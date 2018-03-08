@@ -8,10 +8,12 @@ class UsersController < ApplicationController
     @user = User.new(user_params)
 
     if @user.save
-      redirect_to user_url(@user)
+      session[:session_token] = @user.session_token
+      flash[:success] = "Successfully created your account!"
+      redirect_to cats_url
     else
       flash.now[:errors] = @user.errors.full_messages
-      render :new
+      redirect_to new_session_url
     end
   end
 

@@ -7,14 +7,20 @@ class User < ApplicationRecord
 
   attr_reader :password
 
+  def password=(password)
+    @password = password
+    self.password_digest = BCrypt::Password.create(password)
+  end
+
+
   def self.find_by_credentials(user_name, password)
     user = User.find_by(user_name: user_name)
-    return user if user && self.is_password?(password)
+    return user if user && user.is_password?(user, password)
     nil
   end
 
   def self.generate_session_token
-    SecureRandom::Urlsafe_base64
+    SecureRandom.urlsafe_base64
   end
 
   def reset_session_token!
@@ -23,12 +29,8 @@ class User < ApplicationRecord
     self.session_token
   end
 
-  def password=(password)
-    @password = password
-    self.password_digest = BCrypt::Password.create(password)
-  end
 
-  def is_password?(password)
+  def is_password?(user, password)
     BCrypt::Password.new(user.password_digest).is_password?(password)
   end
 
